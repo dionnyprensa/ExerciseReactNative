@@ -4,11 +4,12 @@ import {createSwitchNavigator} from "react-navigation";
 import {createBottomTabNavigator} from "react-navigation-tabs";
 import {createStackNavigator} from "react-navigation-stack";
 
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons"; import THEME from "../theme.style";
+
 import RegisterScreen from "../screens/RegisterScreen";
 import LoginScreen from "../screens/LoginScreen";
 import HomeScreen from "../screens/HomeScreen";
-import THEME from "../theme.style";
+import AuthLoading from "../screens/AuthLoading";
 
 const shiftingConfig = {
   activeTintColor: THEME.PRIMARY_COLOR,
@@ -80,9 +81,10 @@ const HomeStack = createBottomTabNavigator(
 export default createSwitchNavigator(
   {
     App: HomeStack,
-    Auth: AuthStack
+    Auth: AuthStack,
+    AuthLoading
   },
   {
-    initialRouteName: "Auth"
+    initialRouteName: "AuthLoading"
   }
 );
