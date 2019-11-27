@@ -1,14 +1,12 @@
-import React from 'react';
-import {SafeAreaView} from 'react-native';
-import styled from 'styled-components';
+import React from "react";
+import {SafeAreaView} from "react-native";
+import styled from "styled-components";
 
-const HomeScreen = () => {
-  return (
-    <MainContainer>
-      <Title>Home</Title>
-    </MainContainer>
-  );
-};
+const HomeScreen = () => (
+  <MainContainer>
+    <Title>Home</Title>
+  </MainContainer>
+);
 
 const MainContainer = styled.View`
   flex: 1;
