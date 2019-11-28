@@ -1,52 +1,62 @@
 import axios from "axios";
 import {MainContext} from "../ContextStore";
-import AsyncStorage from "@react-native-community/async-storage";
+import {setToken, getToken, clearToken} from "./localStorage";
 
 const API_URL_BASE = "https://apidev.kanvas.dev/v1";
 
 const AxiosInstance = axios.create({
-  baseURL: API_URL_BASE,
   timeout: 10000,
   headers: {
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
+    Accept: "application/json"
   }
 });
 
-// const errorHandler = (error) => {
-//   if (isHandlerEnabled(error.config)) {
-//     // Handle errors
-//   }
-//   return Promise.reject({...error});
-// };
+AxiosInstance.interceptors.request.use(
+  async (config) => {
+    const token = null; // await getToken();
 
-// const successHandler = (response) => {
-//   if (isHandlerEnabled(response.config)) {
-//     // Handle responses
-//   }
-//   return response;
-// };
-
-const _getToken = () => AsyncStorage.getItem("@user:token");
-const _setToken = (token) => AsyncStorage.setItem("@user:token", token);
-const _clearToken = () => AsyncStorage.removeItem("@user:token");
-
-AxiosInstance.interceptors.request.use(async (config) => {
-  const token = await _getToken();
-  // check if token has expired and re-login
-  if ((token === null || token === undefined) && config.method !== "OPTIONS") {
-    config.headers["authorization"] = "Bearer " + token;
+    // if (
+    //   (token !== null || token !== undefined) &&
+    //   config.method !== "OPTIONS"
+    // ) {
+    //   config.headers["authorization"] = "Bearer " + token;
+    //   return config;
+    // }
     return config;
+  },
+  (error) => {
+    console.log("\nINTERCEPTOR - REQUEST: " + error);
+    console.log("\nINTERCEPTOR - REQUEST: " + error.headers);
+    console.log("\nINTERCEPTOR - REQUEST");
+
+    return Promise.reject(error);
   }
-});
+);
 
 AxiosInstance.interceptors.response.use(
   async (response) => {
-    const oldToken = _getToken();
+    const oldToken = await getToken();
     const newToken = response.data;
-    if (oldToken !== newToken) {
-      _setToken(newToken);
-    }
+    // if (oldToken !== newToken) {
+    //   await setToken(newToken);
+    // }
     return response;
   },
-  (error) => Promise.reject({...error})
+  (error) => {
+    console.log("\nINTERCEPTOR - RESPONSE: " + error);
+    console.log("\nINTERCEPTOR - RESPONSE: " + error.headers);
+    console.log("\nINTERCEPTOR - RESPONSE");
+    return Promise.reject({...error});
+  }
 );
+
+export function post(url, data) {
+  return AxiosInstance.post(API_URL_BASE + url, data);
+}
+
+export function get(url) {
+  return AxiosInstance.get(API_URL_BASE + url);
+}
+
+// export default {axios: {}, url: API_URL_BASE};

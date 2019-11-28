@@ -3,6 +3,12 @@ import {ActivityIndicator, SafeAreaView, StatusBar} from "react-native";
 import styled from "styled-components";
 import THEME from "../theme.style";
 import {MainContext} from "../ContextStore";
+import {
+  getUserData,
+  clearUserData,
+  getToken,
+  clearToken
+} from "../services/localStorage";
 import AsyncStorage from "@react-native-community/async-storage";
 
 export default ({navigation}) => {
@@ -10,19 +16,19 @@ export default ({navigation}) => {
 
   useEffect(() => {
     const checkToken = async () => {
-      await AsyncStorage.removeItem("@user:token", () => {});
-      await AsyncStorage.removeItem("@user:id", () => {});
-      const userToken = await AsyncStorage.getItem("@user:token");
-      const userId = await AsyncStorage.getItem("@user:id");
+      await clearUserData();
+      await clearToken();
+      const userToken = await getToken();
+      const userData = await getUserData();
       const goTo =
         userToken === null ||
         userToken === undefined ||
-        userId === null ||
-        userId === undefined
+        userData === null ||
+        userData === undefined
           ? "Auth"
           : "App";
 
-      setGlobalState({userId});
+      setGlobalState({userData});
       navigation.navigate(goTo);
     };
     checkToken();

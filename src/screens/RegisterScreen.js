@@ -1,5 +1,11 @@
+/* eslint-disable dot-location */
 import React, {useState} from "react";
-import {SafeAreaView, StyleSheet, ScrollView} from "react-native";
+import {
+  SafeAreaView,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator
+} from "react-native";
 import styled from "styled-components";
 import TextInput from "../components/form/TextInput.form";
 import ErrorInputRequired from "../components/form/ErrorInputRequired";
@@ -7,54 +13,116 @@ import ColorButton from "../components/form/ColorButton.form";
 import ScreenTitle from "../components/screen/screenTitle";
 import THEME from "../theme.style";
 import {withNavigation} from "react-navigation";
+import {registerService} from "../services/authServices";
+import {saveToken, saveUserData} from "../services/localStorage";
 
 const RegisterScreen = ({navigation}) => {
   const [userData, setUserData] = useState({
-    firstName: null,
-    lastName: null,
-    email: null,
-    password: null,
-    verifyPassword: null,
-    defaultCompany: null
+    firstname: "Dionny",
+    lastname: "Prensa",
+    email: "d.prensa1@gmail.com",
+    password: "Aa123456",
+    verify_password: "Aa123456",
+    default_company: "Pitafoo"
   });
 
+  const [loading, setLoading] = useState(false);
+
   const [formError, setFormError] = useState({
-    hasError: true,
+    hasError: false,
     message: "Esto es un error del sistema"
   });
 
-  function firstNameHandler(firstName) {
-    setUserData({...userData, firstName});
-    setFormError({hasError: false, message: ""});
+  // #region Properties Handlers
+  function firstnameHandler(firstname) {
+    setUserData({...userData, firstname});
   }
 
-  function lastNameHandler(lastName) {
-    setUserData({...userData, lastName});
-    setFormError({hasError: false, message: ""});
+  function lastnameHandler(lastname) {
+    setUserData({...userData, lastname});
   }
 
   function emailHandler(email) {
     setUserData({...userData, email});
-    setFormError({hasError: false, message: ""});
   }
 
   function passwordHandler(password) {
     setUserData({...userData, password});
-    setFormError({hasError: false, message: ""});
   }
 
-  function verifyPasswordHandler(verifyPassword) {
-    setUserData({...userData, verifyPassword});
-    setFormError({hasError: false, message: ""});
+  function verifyPasswordHandler(verify_password) {
+    setUserData({...userData, verify_password});
   }
 
-  function defaultCompanyHandler(defaultCompany) {
-    setUserData({...userData, defaultCompany});
-    setFormError({hasError: false, message: ""});
+  function defaultCompanyHandler(default_company) {
+    setUserData({...userData, default_company});
+  }
+  // #endregion Properties Handlers
+
+  function validateForm() {
+    let _notValid = false;
+
+    const validations = Object.keys(userData).map((key) => {
+      const property = userData[key];
+      if (property === null || property === undefined) {
+        _notValid = true;
+        if (key.includes("_")) {
+          let [first, second] = key.split("_");
+          second = second.slice(0, 1).toUpperCase() + second.slice(1);
+          key = first + second;
+        }
+
+        return `The field ${key} is required`;
+      }
+      return "";
+    });
+
+    if (userData.password !== userData.verify_password) {
+      _notValid = true;
+      validations.push("The passwords must match");
+    }
+
+    const message = validations.filter((v) => v !== "").join("\n");
+
+    setFormError({hasError: _notValid, message});
+
+    return !_notValid;
   }
 
   function loginButtonHandler() {
     navigation.navigate("Login");
+  }
+
+  function registerButtonHandler() {
+    setLoading(true);
+    let _isValid = true;
+    _isValid = validateForm();
+
+    if (!_isValid) {
+      setLoading(false);
+    } else {
+      registerService({
+        ...userData
+      })
+        .then((response) => {
+          setLoading(false);
+          return response.data;
+        })
+        .then((data) => {
+          console.log("\n\ndata");
+          console.log(data);
+          console.log("data\n\n");
+          saveUserData(JSON.stringify(data));
+          return data.token;
+        })
+        .then((token) => saveToken(token))
+        .then(() => navigation.navigate("App"))
+        .catch((err) => {
+          console.log({...err});
+          setFormError({hasError: true, message: err});
+        });
+      setLoading(false);
+    }
   }
 
   return (
@@ -78,8 +146,8 @@ const RegisterScreen = ({navigation}) => {
                 iconName="account-outline"
                 textProps={{
                   autoFocus: true,
-                  value: userData.firstName,
-                  onChangeText: firstNameHandler,
+                  value: userData.firstname,
+                  onChangeText: firstnameHandler,
                   placeholder: "First Name",
                   style: styles.inputText,
                   placeholderTextColor: THEME.COLOR_DARK_GRAY
@@ -90,8 +158,8 @@ const RegisterScreen = ({navigation}) => {
               <TextInput
                 iconName="account-multiple-outline"
                 textProps={{
-                  value: userData.lastName,
-                  onChangeText: lastNameHandler,
+                  value: userData.lastname,
+                  onChangeText: lastnameHandler,
                   placeholder: "Last Name",
                   style: styles.inputText,
                   placeholderTextColor: THEME.COLOR_DARK_GRAY
@@ -118,8 +186,8 @@ const RegisterScreen = ({navigation}) => {
                   keyboardType: "default",
                   placeholder: "Password",
                   textContentType: "password",
-                  value: userData.verifyPassword,
-                  onChangeText: verifyPasswordHandler,
+                  value: userData.password,
+                  onChangeText: passwordHandler,
                   secureTextEntry: true,
                   style: styles.inputText,
                   placeholderTextColor: THEME.COLOR_DARK_GRAY
@@ -132,10 +200,10 @@ const RegisterScreen = ({navigation}) => {
                 iconName="lock-reset"
                 textProps={{
                   keyboardType: "default",
-                  placeholder: "Password",
+                  placeholder: "Verify Password",
                   textContentType: "password",
-                  value: userData.verifyPassword,
-                  onChangeText: passwordHandler,
+                  value: userData.verify_password,
+                  onChangeText: verifyPasswordHandler,
                   secureTextEntry: true,
                   style: styles.inputText,
                   placeholderTextColor: THEME.COLOR_DARK_GRAY
@@ -148,21 +216,25 @@ const RegisterScreen = ({navigation}) => {
                 textProps={{
                   keyboardType: "default",
                   placeholder: "Company",
-                  value: userData.defaultCompany,
+                  value: userData.default_company,
                   onChangeText: defaultCompanyHandler,
                   style: styles.inputText,
                   placeholderTextColor: THEME.COLOR_DARK_GRAY
                 }}
               />
             </TextInputWrapper>
-            <ButtonContainer>
-              <ColorButton title="Start" />
-              <ColorButton
-                title="Login"
-                style={styles.loginButton}
-                onPress={loginButtonHandler}
-              />
-            </ButtonContainer>
+            {loading ? (
+              <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
+            ) : (
+              <ButtonContainer>
+                <ColorButton title="Start" onPress={registerButtonHandler} />
+                <ColorButton
+                  title="Login"
+                  style={styles.loginButton}
+                  onPress={loginButtonHandler}
+                />
+              </ButtonContainer>
+            )}
           </FormContainer>
         </MainContainer>
       </ScrollView>
