@@ -9,7 +9,6 @@ import {
   getToken,
   clearToken
 } from "../services/localStorage";
-import AsyncStorage from "@react-native-community/async-storage";
 
 export default ({navigation}) => {
   const [globalState, setGlobalState] = useContext(MainContext);

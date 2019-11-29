@@ -1,6 +1,14 @@
 import axios from "axios";
 import {MainContext} from "../ContextStore";
-import {setToken, getToken, clearToken} from "./localStorage";
+import {loginService} from "./authServices";
+import {
+  saveToken,
+  saveRefreshToken,
+  getToken,
+  clearToken,
+  getRefreshToken,
+  getUserData
+} from "./localStorage";
 
 const API_URL_BASE = "https://apidev.kanvas.dev/v1";
 
@@ -14,15 +22,10 @@ const AxiosInstance = axios.create({
 
 AxiosInstance.interceptors.request.use(
   async (config) => {
-    const token = null; // await getToken();
-
-    // if (
-    //   (token !== null || token !== undefined) &&
-    //   config.method !== "OPTIONS"
-    // ) {
-    //   config.headers["authorization"] = "Bearer " + token;
-    //   return config;
-    // }
+    const token = await getToken();
+    if (token) {
+      config.headers["Authorization"] = "Bearer " + token;
+    }
     return config;
   },
   (error) => {
@@ -36,18 +39,21 @@ AxiosInstance.interceptors.request.use(
 
 AxiosInstance.interceptors.response.use(
   async (response) => {
-    const oldToken = await getToken();
-    const newToken = response.data;
-    // if (oldToken !== newToken) {
-    //   await setToken(newToken);
-    // }
+    const {token, refresh_token} = response.data;
+    await saveToken(token);
+    await saveRefreshToken(refresh_token);
     return response;
   },
-  (error) => {
-    console.log("\nINTERCEPTOR - RESPONSE: " + error);
-    console.log("\nINTERCEPTOR - RESPONSE: " + error.headers);
-    console.log("\nINTERCEPTOR - RESPONSE");
-    return Promise.reject({...error});
+  async (error) => {
+    const originalRequest = error.config;
+    if (error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      const refreshToken = await getRefreshToken();
+
+      AxiosInstance.defaults.headers.common["Authorization"] =
+        "Bearer " + refreshToken;
+    }
+    return AxiosInstance(originalRequest);
   }
 );
 

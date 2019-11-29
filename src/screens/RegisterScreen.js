@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable dot-location */
 import React, {useState} from "react";
 import {
@@ -20,7 +21,7 @@ const RegisterScreen = ({navigation}) => {
   const [userData, setUserData] = useState({
     firstname: "Dionny",
     lastname: "Prensa",
-    email: "d.prensa1@gmail.com",
+    email: "d2@prensa.com",
     password: "Aa123456",
     verify_password: "Aa123456",
     default_company: "Pitafoo"
@@ -89,42 +90,40 @@ const RegisterScreen = ({navigation}) => {
     return !_notValid;
   }
 
+  // #region Handler Methods
   function loginButtonHandler() {
     navigation.navigate("Login");
   }
 
   function registerButtonHandler() {
     setLoading(true);
-    let _isValid = true;
-    _isValid = validateForm();
+    let _formValid = validateForm();
 
-    if (!_isValid) {
+    if (!_formValid) {
       setLoading(false);
-    } else {
-      registerService({
-        ...userData
-      })
-        .then((response) => {
-          setLoading(false);
-          return response.data;
-        })
-        .then((data) => {
-          console.log("\n\ndata");
-          console.log(data);
-          console.log("data\n\n");
-          saveUserData(JSON.stringify(data));
-          return data.token;
-        })
-        .then((token) => saveToken(token))
-        .then(() => navigation.navigate("App"))
-        .catch((err) => {
-          console.log({...err});
-          setFormError({hasError: true, message: err});
-        });
-      setLoading(false);
+      return;
     }
+
+    registerService(userData)
+      .then((response) => JSON.stringify(response.data))
+      .then((userData) => {
+        saveUserData({userData});
+        console.log(userData);
+        return userData.token;
+      })
+      .then((token) => saveToken(token))
+      .then(() => navigation.navigate("App"))
+      .catch((error) => {
+        setFormError({hasError: true, message: error});
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }
 
+  // #endregion Handler Methods
+
+  // #region Render Method
   return (
     <SafeAreaView style={styles.safeAreaView}>
       <ScrollView

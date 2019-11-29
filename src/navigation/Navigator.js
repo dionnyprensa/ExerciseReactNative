@@ -31,7 +31,7 @@ const AuthStack = createStackNavigator(
     LogOut: RegisterScreen
   },
   {
-    initialRouteName: "Register",
+    initialRouteName: "Login",
     // headerMode: "screen"
     headerMode: "none"
   }

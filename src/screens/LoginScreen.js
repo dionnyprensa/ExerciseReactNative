@@ -1,5 +1,6 @@
+/* eslint-disable dot-location */
 import React, {useState} from "react";
-import {SafeAreaView, StyleSheet} from "react-native";
+import {SafeAreaView, StyleSheet, ActivityIndicator} from "react-native";
 import styled from "styled-components";
 import TextInput from "../components/form/TextInput.form";
 import ErrorInputRequired from "../components/form/ErrorInputRequired";
@@ -7,11 +8,18 @@ import ColorButton from "../components/form/ColorButton.form";
 import ScreenTitle from "../components/screen/screenTitle";
 import THEME from "../theme.style";
 import {withNavigation} from "react-navigation";
+import {loginService} from "../services/authServices";
+import {
+  saveUserData,
+  saveToken,
+  saveRefreshToken
+} from "../services/localStorage";
 
 const LoginScreen = ({navigation}) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("d2@prensa.com");
+  const [password, setPassword] = useState("Aa123456");
   const [formError, setFormError] = useState({hasError: false, message: ""});
+  const [loading, setLoading] = useState(false);
 
   // #region Handler Methods
   function emailHandler(_email) {
@@ -24,29 +32,56 @@ const LoginScreen = ({navigation}) => {
     setFormError({hasError: false, message: ""});
   }
 
+  function validateForm() {
+    let _isValid = true;
+
+    if (
+      email === null ||
+      email === undefined ||
+      password === null ||
+      password === undefined
+    ) {
+      _isValid = false;
+      setFormError({hasError: true, message: "all fields must be filled"});
+    } else {
+      setFormError({hasError: false, message: ""});
+    }
+
+    return _isValid;
+  }
+
   function registerButtonHandler() {
     navigation.navigate("Register");
   }
 
-  function submitForm() {
-    if (!email || !password) {
-      setFormError({hasError: true, message: "all fields must be filled"});
+  function loginButtonHandler() {
+    setLoading(true);
+    let _formValid = validateForm();
+
+    if (!_formValid) {
+      setLoading(false);
       return;
     }
-    setFormError({hasError: false, message: ""});
-    // McTekkService.Login({email, password})
-    //   .then(async ({data: {mobileLogin}}) => {
-    //     if (mobileLogin.user) {
-    //       let token = mobileLogin.user.token;
-    //       let userId = mobileLogin.user._id;
-    //       await AsyncStorage.setItem("@user:id", userId);
-    //       AsyncStorage.setItem("@user:token", token).then(() => {
-    //         setGlobalState({userId});
-    //         navigation.navigate("App");
-    //       });
-    //     }
-    //   })
-    //   .catch((err) => console.log(err));
+
+    loginService({email, password})
+      .then((response) => JSON.stringify(response.data))
+      .then((userData) => {
+        setLoading(false);
+        const {token, refresh_token} = userData;
+        saveUserData(JSON.stringify({email, password}));
+        saveToken(token);
+        saveRefreshToken(refresh_token);
+      })
+      .then(() => navigation.navigate("App"))
+      .catch((error) => {
+        console.error("\nLogin Error:");
+        console.error(error);
+        console.error("");
+        setFormError({hasError: true, message: error});
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }
 
   // #endregion Handler Methods
@@ -93,14 +128,18 @@ const LoginScreen = ({navigation}) => {
               }}
             />
           </TextInputWrapper>
-          <ButtonContainer>
-            <ColorButton title="Start" />
-            <ColorButton
-              title="Register"
-              style={styles.registerButton}
-              onPress={registerButtonHandler}
-            />
-          </ButtonContainer>
+          {loading ? (
+            <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
+          ) : (
+            <ButtonContainer>
+              <ColorButton title="Start" onPress={loginButtonHandler} />
+              <ColorButton
+                title="Register"
+                style={styles.registerButton}
+                onPress={registerButtonHandler}
+              />
+            </ButtonContainer>
+          )}
         </FormContainer>
       </MainContainer>
     </SafeAreaView>

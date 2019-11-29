@@ -1,6 +1,6 @@
 import {post} from "../services/baseApiServices";
 
-export function login(loginData) {
+export function loginService(loginData) {
   return post("/auth", loginData);
 }
 
