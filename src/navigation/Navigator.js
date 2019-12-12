@@ -40,7 +40,7 @@ const AuthStack = createStackNavigator(
 const HomeStack = createBottomTabNavigator(
   {
     Home: HomeScreen,
-    Settings: HomeScreen
+    Settings: RegisterScreen
   },
   {
     initialRouteName: "Home",

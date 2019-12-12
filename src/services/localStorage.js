@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable dot-location */
 import AsyncStorage from "@react-native-community/async-storage";
 
@@ -7,11 +8,12 @@ export async function getToken() {
 }
 
 export async function saveToken(token) {
-  clearToken().then(() => {
-    AsyncStorage.setItem("@user:token", token, (error) => {
-      if (error) console.log(error);
-    });
-  });
+  // clearToken().then(() => {
+  //   AsyncStorage.setItem("@user:token", JSON.stringify(token), (error) => {
+  //     if (error) console.log(error);
+  //   });
+  // });
+  return AsyncStorage.setItem("@user:token", JSON.stringify(token));
 }
 
 export async function clearToken() {
@@ -23,11 +25,19 @@ export async function getRefreshToken() {
 }
 
 export async function saveRefreshToken(token) {
-  clearRefreshToken().then(() => {
-    AsyncStorage.setItem("@user:refreshToken", token, (error) => {
+  // clearRefreshToken().then(() => {
+  //   AsyncStorage.setItem("@user:refreshToken", JSON.stringify(token), (error) => {
+  //     if (error) console.log(error);
+  //   });
+  // });
+
+  return AsyncStorage.setItem(
+    "@user:refreshToken",
+    JSON.stringify(token),
+    (error) => {
       if (error) console.log(error);
-    });
-  });
+    }
+  );
 }
 
 export async function clearRefreshToken() {
@@ -43,13 +53,11 @@ export async function getUserData() {
 
 export async function saveUserData(userData) {
   return clearUserData().then(() => {
-    AsyncStorage.setItem("@user:data", userData);
+    AsyncStorage.setItem("@user:data", JSON.stringify(userData));
   });
 }
 
 export async function clearUserData() {
-  return AsyncStorage.removeItem("@user:data").catch((error) =>
-    console.log(error)
-  );
+  return AsyncStorage.removeItem("@user:data");
 }
 // #endregion UserData Methods

@@ -107,7 +107,7 @@ const RegisterScreen = ({navigation}) => {
     registerService(userData)
       .then((response) => JSON.stringify(response.data))
       .then((userData) => {
-        saveUserData({userData});
+        saveUserData(JSON.stringify({userData}));
         console.log(userData);
         return userData.token;
       })

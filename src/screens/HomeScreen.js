@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable dot-location */
 import React, {useState, useEffect} from "react";
 import {SafeAreaView, FlatList, ActivityIndicator} from "react-native";
@@ -6,25 +7,32 @@ import {users as getUsers} from "../services/usersServices";
 import THEME from "../theme.style";
 
 const HomeScreen = () => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
 
-  useEffect(() => {
-    setLoading(true);
-    getUsers()
-      .then((response) => JSON.stringify(response.data))
+  function loadUserData() {
+    return getUsers()
+      .catch((e) => console.log("y klk", e))
+      .then((response) => response.data)
       .then((usersData) => {
-        setData(usersData);
-        setLoading(false);
+        console.log(usersData);
+        return setData(JSON.stringify(usersData));
       })
       .catch((error) => {
-        console.error("\nLogin Error:");
-        console.error(error);
-        console.error("");
+        console.error("\nHome Error:");
+        console.error(error, "\n");
       })
       .finally(() => {
+        console.log("use Effect finalizó?");
         setLoading(false);
       });
+  }
+
+  useEffect(() => {
+    console.log("use Effect empezó");
+    // setLoading(true);
+
+    loadUserData();
   }, []);
 
   function _keyExtractor(item) {
@@ -51,19 +59,20 @@ const HomeScreen = () => {
   }
   // #region Render Method
   return (
-    <MainContainer>
-      {loading ? (
-        <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
-      ) : (
-        <Title>{data}</Title>
-      )}
-    </MainContainer>
+    <SafeAreaView>
+      <MainContainer>
+        {loading ? (
+          <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
+        ) : (
+          <Title>data</Title>
+        )}
+      </MainContainer>
+    </SafeAreaView>
   );
   // #endregion Render Method
 };
 
 const MainContainer = styled.View`
-  flex: 1;
   width: 100%;
   height: 100%;
   margin: 0 5px;

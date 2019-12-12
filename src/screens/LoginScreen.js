@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable dot-location */
 import React, {useState} from "react";
 import {SafeAreaView, StyleSheet, ActivityIndicator} from "react-native";
@@ -63,16 +64,23 @@ const LoginScreen = ({navigation}) => {
       return;
     }
 
-    loginService({email, password})
-      .then((response) => JSON.stringify(response.data))
+    let loginData = {email, password};
+    let token;
+    let refresh_token;
+
+    loginService(loginData)
+      .then((response) => response.data)
       .then((userData) => {
-        setLoading(false);
-        const {token, refresh_token} = userData;
-        saveUserData(JSON.stringify({email, password}));
-        saveToken(token);
-        saveRefreshToken(refresh_token);
+        token = userData.token;
+        refresh_token = userData.refresh_token;
+        return saveUserData(JSON.stringify(loginData));
       })
-      .then(() => navigation.navigate("App"))
+      .then(() => saveToken(token))
+      .then(() => saveRefreshToken(refresh_token))
+      .then(() => {
+        setLoading(false);
+        navigation.navigate("App");
+      })
       .catch((error) => {
         console.error("\nLogin Error:");
         console.error(error);

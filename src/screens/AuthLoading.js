@@ -15,8 +15,8 @@ export default ({navigation}) => {
 
   useEffect(() => {
     const checkToken = async () => {
-      await clearUserData();
-      await clearToken();
+      // await clearUserData();
+      // await clearToken();
       const userToken = await getToken();
       const userData = await getUserData();
       const goTo =

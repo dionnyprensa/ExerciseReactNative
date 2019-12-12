@@ -39,9 +39,10 @@ AxiosInstance.interceptors.request.use(
 
 AxiosInstance.interceptors.response.use(
   async (response) => {
-    const {token, refresh_token} = response.data;
-    await saveToken(token);
-    await saveRefreshToken(refresh_token);
+    let {token, refresh_token} = response.data;
+
+    await saveToken(token || "");
+    await saveRefreshToken(refresh_token || "");
     return response;
   },
   async (error) => {
