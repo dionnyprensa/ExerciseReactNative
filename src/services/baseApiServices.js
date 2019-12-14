@@ -23,7 +23,8 @@ const AxiosInstance = axios.create({
 AxiosInstance.interceptors.request.use(
   async (config) => {
     const token = await getToken();
-    if (token) {
+
+    if (token && token.length > 0) {
       config.headers["Authorization"] = "Bearer " + token;
     }
     return config;
@@ -39,10 +40,12 @@ AxiosInstance.interceptors.request.use(
 
 AxiosInstance.interceptors.response.use(
   async (response) => {
-    let {token, refresh_token} = response.data;
-
-    await saveToken(token || "");
-    await saveRefreshToken(refresh_token || "");
+    if (response.data) {
+      //   let {token, refresh_token} = response.data;
+      //   await saveToken(token || "");
+      //   await saveRefreshToken(refresh_token || "");
+      //   console.log(response.data);
+    }
     return response;
   },
   async (error) => {
@@ -62,7 +65,7 @@ export function post(url, data) {
   return AxiosInstance.post(API_URL_BASE + url, data);
 }
 
-export function get(url) {
+export function get(url, config = null) {
   return AxiosInstance.get(API_URL_BASE + url);
 }
 

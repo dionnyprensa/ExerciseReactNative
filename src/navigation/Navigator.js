@@ -4,9 +4,11 @@ import {createSwitchNavigator} from "react-navigation";
 import {createBottomTabNavigator} from "react-navigation-tabs";
 import {createStackNavigator} from "react-navigation-stack";
 
-import Icon from "react-native-vector-icons/MaterialCommunityIcons"; import THEME from "../theme.style";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import THEME from "../theme.style";
 
 import RegisterScreen from "../screens/RegisterScreen";
+import LogOutScreen from "../screens/LogOutScreen";
 import LoginScreen from "../screens/LoginScreen";
 import HomeScreen from "../screens/HomeScreen";
 import AuthLoading from "../screens/AuthLoading";
@@ -28,7 +30,7 @@ const AuthStack = createStackNavigator(
   {
     Login: LoginScreen,
     Register: RegisterScreen,
-    LogOut: RegisterScreen
+    LogOut: LogOutScreen
   },
   {
     initialRouteName: "Login",
@@ -40,7 +42,7 @@ const AuthStack = createStackNavigator(
 const HomeStack = createBottomTabNavigator(
   {
     Home: HomeScreen,
-    Settings: RegisterScreen
+    Settings: LogOutScreen
   },
   {
     initialRouteName: "Home",

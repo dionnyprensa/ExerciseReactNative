@@ -17,8 +17,8 @@ import {
 } from "../services/localStorage";
 
 const LoginScreen = ({navigation}) => {
-  const [email, setEmail] = useState("d2@prensa.com");
-  const [password, setPassword] = useState("Aa123456");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [formError, setFormError] = useState({hasError: false, message: ""});
   const [loading, setLoading] = useState(false);
 
@@ -82,13 +82,11 @@ const LoginScreen = ({navigation}) => {
         navigation.navigate("App");
       })
       .catch((error) => {
+        setLoading(false);
         console.error("\nLogin Error:");
         console.error(error);
         console.error("");
         setFormError({hasError: true, message: error});
-      })
-      .finally(() => {
-        setLoading(false);
       });
   }
 
@@ -116,7 +114,8 @@ const LoginScreen = ({navigation}) => {
                 onChangeText: emailHandler,
                 placeholder: "Email",
                 style: styles.inputText,
-                placeholderTextColor: THEME.COLOR_DARK_GRAY
+                placeholderTextColor: THEME.COLOR_DARK_GRAY,
+                focus: true
               }}
             />
           </TextInputWrapper>
@@ -132,7 +131,8 @@ const LoginScreen = ({navigation}) => {
                 onChangeText: passwordHandler,
                 secureTextEntry: true,
                 style: styles.inputText,
-                placeholderTextColor: THEME.COLOR_DARK_GRAY
+                placeholderTextColor: THEME.COLOR_DARK_GRAY,
+                focus: false
               }}
             />
           </TextInputWrapper>

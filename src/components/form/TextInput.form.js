@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, {useState} from "react";
 import {StyleSheet} from "react-native";
 import styled from "styled-components";
@@ -49,7 +50,6 @@ const Container = styled.View`
   border-radius: 4px;
   padding: 0px ${(props) => props.theme.PADDING_SMALL + "px"};
   margin: ${(props) => props.theme.MARGIN_SMALL + "px"} 0px;
-
   /* border: dashed 1px ${(props) => props.theme.PRIMARY_COLOR}; */
   border: solid 1px ${(props) =>
     props.isFocused

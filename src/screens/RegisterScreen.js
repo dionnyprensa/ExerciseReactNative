@@ -19,12 +19,12 @@ import {saveToken, saveUserData} from "../services/localStorage";
 
 const RegisterScreen = ({navigation}) => {
   const [userData, setUserData] = useState({
-    firstname: "Dionny",
-    lastname: "Prensa",
-    email: "d2@prensa.com",
-    password: "Aa123456",
-    verify_password: "Aa123456",
-    default_company: "Pitafoo"
+    firstname: "",
+    lastname: "",
+    email: "",
+    password: "",
+    verify_password: "",
+    default_company: ""
   });
 
   const [loading, setLoading] = useState(false);
@@ -105,13 +105,13 @@ const RegisterScreen = ({navigation}) => {
     }
 
     registerService(userData)
-      .then((response) => JSON.stringify(response.data))
+      .then((response) => ({session: response.data.session, user: response.data.user}))
       .then((userData) => {
-        saveUserData(JSON.stringify({userData}));
-        console.log(userData);
-        return userData.token;
+        const {session, user} = userData;
+        saveUserData(JSON.stringify(user));
+        return session.token;
       })
-      .then((token) => saveToken(token))
+      .then((token) => saveToken(JSON.stringify(token)))
       .then(() => navigation.navigate("App"))
       .catch((error) => {
         setFormError({hasError: true, message: error});
